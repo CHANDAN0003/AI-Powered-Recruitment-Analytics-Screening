@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Candidate Portal - TalentConnect</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="dashboard-body">
+    <!-- Header -->
+    <header class="dashboard-header">
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-users-cog"></i>
+                <span>TalentConnect</span>
+            </div>
+            <div class="user-menu">
+                <span class="user-name">Welcome, Candidate</span>
+                <button class="logout-btn" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <div class="page-header">
+                <h1><i class="fas fa-search"></i> Job Opportunities</h1>
+                <p>Discover your next career move</p>
+            </div>
+
+            <!-- Search and Filters -->
+            <div class="search-filters">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="jobSearch" placeholder="Search jobs by title, company, or skills...">
+                </div>
+                <div class="filter-options">
+                    <select id="experienceFilter">
+                        <option value="">All Experience Levels</option>
+                        <option value="entry">Entry Level</option>
+                        <option value="mid">Mid Level</option>
+                        <option value="senior">Senior Level</option>
+                    </select>
+                    <select id="skillsFilter">
+                        <option value="">All Skills</option>
+                        <option value="javascript">JavaScript</option>
+                        <option value="python">Python</option>
+                        <option value="react">React</option>
+                        <option value="nodejs">Node.js</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Jobs Grid -->
+            <div class="jobs-grid" id="jobsGrid">
+                <!-- Jobs will be loaded here dynamically -->
+            </div>
+
+            <!-- Loading State -->
+            <div class="loading-state" id="jobsLoading">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Loading job opportunities...</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Application Modal -->
+    <div class="modal" id="applicationModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-file-alt"></i> Apply for Position</h2>
+                <button class="modal-close" onclick="closeApplicationModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="applicationForm" class="application-form">
+                <input type="hidden" id="jobId" name="jobId">
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="applicantName">Full Name *</label>
+                        <input type="text" id="applicantName" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="applicantEmail">Email Address *</label>
+                        <input type="email" id="applicantEmail" name="email" required>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="applicantPhone">Phone Number</label>
+                        <input type="tel" id="applicantPhone" name="phone">
+                    </div>
+                    <div class="form-group">
+                        <label for="applicantExperience">Years of Experience *</label>
+                        <select id="applicantExperience" name="experience" required>
+                            <option value="">Select experience</option>
+                            <option value="0-1">0-1 years</option>
+                            <option value="2-5">2-5 years</option>
+                            <option value="5-10">5-10 years</option>
+                            <option value="10+">10+ years</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="applicantSkills">Skills *</label>
+                    <input type="text" id="applicantSkills" name="skills" required 
+                           placeholder="e.g., JavaScript, React, Node.js, Python">
+                    <small>Please separate skills with commas</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="applicantResume">Resume Upload *</label>
+                    <div class="file-upload">
+                        <input type="file" id="applicantResume" name="resume" accept=".pdf,.doc,.docx" required>
+                        <div class="file-upload-display">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <span>Click to upload or drag and drop</span>
+                            <small>PDF, DOC, DOCX (Max 5MB)</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="coverLetter">Cover Letter</label>
+                    <textarea id="coverLetter" name="coverLetter" rows="4" 
+                              placeholder="Tell us why you're perfect for this role..."></textarea>
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" onclick="closeApplicationModal()">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn-primary" id="submitApplicationBtn">
+                        <span class="btn-text">Submit Application</span>
+                        <i class="fas fa-spinner fa-spin" id="applicationSpinner" style="display: none;"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Chatbot Widget -->
+    <div class="chatbot-widget" id="chatbotWidget">
+        <div class="chatbot-header" onclick="toggleChatbot()">
+            <i class="fas fa-comments"></i>
+            <span>Chat Support</span>
+            <i class="fas fa-chevron-up" id="chatbotToggle"></i>
+        </div>
+        <div class="chatbot-body" id="chatbotBody">
+            <div class="chatbot-messages" id="chatbotMessages">
+                <div class="message bot-message">
+                    <div class="message-avatar">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="message-content">
+                        <p>Hello! I'm here to help you with any questions about job applications or the recruitment process. How can I assist you today?</p>
+                        <span class="message-time">Now</span>
+                    </div>
+                </div>
+            </div>
+            <div class="chatbot-input">
+                <input type="text" id="chatbotInput" placeholder="Type your message...">
+                <button type="button" onclick="sendChatMessage()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="toast"></div>
+
+    <script src="app.js"></script>
+    <script src="chatbot.js"></script>
+</body>
+</html>
