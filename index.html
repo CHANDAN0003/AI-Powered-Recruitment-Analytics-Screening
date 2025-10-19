@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Header -->
     <title>TalentConnect - Recruitment Portal</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -41,49 +41,61 @@
                 <div class="form-group">
                     <label for="email">
                         <i class="fas fa-envelope"></i>
-                        Email Address
-                    </label>
-                    <input type="email" id="email" name="email" required placeholder="Enter your email">
-                </div>
-                
-                <div class="form-group">
-                    <label for="password">
-                        <i class="fas fa-lock"></i>
-                        Password
-                    </label>
-                    <input type="password" id="password" name="password" required placeholder="Enter your password">
-                </div>
-                
-                <button type="submit" class="login-btn" id="loginBtn">
-                    <span class="btn-text">Sign In</span>
-                    <i class="fas fa-spinner fa-spin" id="loginSpinner" style="display: none;"></i>
-                </button>
-                
-                <div class="login-footer">
-                    <a href="#" class="forgot-link">Forgot your password?</a>
-                    <p>Don't have an account? <a href="#" class="signup-link">Sign up here</a></p>
-                </div>
-            </form>
-        </div>
-        
-        <!-- Demo Credentials Info -->
-        <div class="demo-info">
-            <h3><i class="fas fa-info-circle"></i> Demo Credentials</h3>
-            <div class="demo-credentials">
-                <div>
-                    <strong>Candidate:</strong>
-                    <span>candidate@demo.com / demo123</span>
-                </div>
-                <div>
-                    <strong>HR:</strong>
-                    <span>hr@demo.com / demo123</span>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Notification Toast -->
-    <div id="toast" class="toast"></div>
+                    <!-- Hero Section -->
+                    <main class="hero-main">
+                        <div class="hero">
+                            <div class="hero-image" style="background-image: url('https://images.unsplash.com/photo-1524504388940-b1c1722653e1?q=80&w=1400&auto=format&fit=crop&ixlib=rb-4.0.3&s=9c2f0f8ac7a2b7e7a3a5e7a4e9f0f6a6');"></div>
+                            <div class="hero-content">
+                                <h1>Job Searching Just Got Easy</h1>
+                                <p>Find and apply to relevant jobs with AI-powered screening and instant candidate insights.</p>
+                                <div class="hero-actions">
+                                    <a href="candidate.html" class="btn-primary">Explore Jobs</a>
+                                    <a href="hr.html" class="btn-outline">I'm Recruiter</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="container">
+                            <div class="page-header">
+                                <h2>Recent Jobs</h2>
+                                <p>Featured opportunities and trending roles</p>
+                            </div>
+
+                            <!-- Search and Filters -->
+                            <div class="search-filters">
+                                <div class="search-box">
+                                    <i class="fas fa-search"></i>
+                                    <input type="text" id="jobSearch" placeholder="Search jobs by title, company, or skills...">
+                                </div>
+                                <div class="filter-options">
+                                    <select id="experienceFilter">
+                                        <option value="">All Experience Levels</option>
+                                        <option value="entry">Entry Level</option>
+                                        <option value="mid">Mid Level</option>
+                                        <option value="senior">Senior Level</option>
+                                    </select>
+                                    <select id="skillsFilter">
+                                        <option value="">All Skills</option>
+                                        <option value="javascript">JavaScript</option>
+                                        <option value="python">Python</option>
+                                        <option value="react">React</option>
+                                        <option value="nodejs">Node.js</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Jobs Grid -->
+                            <div class="jobs-grid" id="jobsGrid">
+                                <!-- Jobs will be loaded here dynamically -->
+                            </div>
+
+                            <!-- Loading State -->
+                            <div class="loading-state" id="jobsLoading">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                <p>Loading job opportunities...</p>
+                            </div>
+                        </div>
+                    </main>
     
     <script src="app.js"></script>
 </body>

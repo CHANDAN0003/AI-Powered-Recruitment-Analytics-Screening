@@ -7,6 +7,8 @@ import os
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
 from passlib.context import CryptContext
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -89,9 +91,57 @@ async def login(user: UserIn):
         raise HTTPException(status_code=400, detail='Incorrect email or password')
 
     # verify password if stored (for future)
-    # For now accept any password for existing user
+    # verify password if stored
+    stored_hash = u.get('password')
+    if stored_hash:
+        if not pwd_context.verify(user.password, stored_hash):
+            raise HTTPException(status_code=400, detail='Incorrect email or password')
+
     token = create_access_token({'sub': user.email, 'role': u.get('role', 'candidate')})
     return { 'success': True, 'user': { 'email': u['email'], 'role': u.get('role','candidate'), 'name': u.get('name') }, 'token': token }
+
+
+# New registration and login endpoints (used by SPA)
+class RegisterIn(BaseModel):
+    name: str
+    email: EmailStr
+    password: str
+
+
+@app.post('/register')
+async def register(payload: RegisterIn):
+    existing = await db.users.find_one({'email': payload.email})
+    if existing:
+        return { 'success': False, 'message': 'User already exists' }
+
+    hashed = pwd_context.hash(payload.password)
+    user_doc = {
+        'name': payload.name,
+        'email': payload.email,
+        'password': hashed,
+        'role': 'candidate',
+        'createdAt': datetime.utcnow()
+    }
+    await db.users.insert_one(user_doc)
+    return { 'success': True }
+
+
+class LoginIn(BaseModel):
+    email: EmailStr
+    password: str
+
+
+@app.post('/login')
+async def login_spa(payload: LoginIn):
+    user = await db.users.find_one({'email': payload.email})
+    if not user:
+        return { 'success': False, 'message': 'Invalid credentials' }
+
+    if not pwd_context.verify(payload.password, user.get('password','')):
+        return { 'success': False, 'message': 'Invalid credentials' }
+
+    token = create_access_token({'sub': user['email'], 'role': user.get('role','candidate')})
+    return { 'success': True, 'token': token, 'user': { 'email': user['email'], 'name': user.get('name'), 'role': user.get('role') } }
 
 
 @app.get('/api/jobs')
@@ -147,9 +197,38 @@ async def applicants(current=Depends(get_current_user)):
 
 @app.post('/api/send_email')
 async def send_email(payload: dict, current=Depends(get_current_user)):
-    # For demo, just record request
-    await db.email_logs.insert_one({'requestedBy': current['email'], 'payload': payload, 'ts': datetime.utcnow()})
-    return { 'success': True }
+    # Only HR role may send emails
+    if current.get('role') != 'hr':
+        raise HTTPException(status_code=403, detail='Insufficient permissions')
+
+    emails = payload.get('emails', [])
+    subject = payload.get('subject', 'Message from TalentConnect')
+    body = payload.get('body', '')
+
+    results = []
+    SENDGRID_API_KEY = os.getenv('SENDGRID_API_KEY')
+    FROM_EMAIL = os.getenv('FROM_EMAIL')
+
+    # If SendGrid isn't configured, just log the request
+    if not SENDGRID_API_KEY or not FROM_EMAIL:
+        await db.email_logs.insert_one({'requestedBy': current['email'], 'payload': payload, 'ts': datetime.utcnow(), 'note': 'sendgrid_not_configured'})
+        return { 'success': True, 'note': 'sendgrid_not_configured' }
+
+    sg = SendGridAPIClient(SENDGRID_API_KEY)
+
+    for e in emails:
+        try:
+            # naive personalization: use email local-part as name if {name} not provided
+            name = e.split('@')[0].replace('.', ' ').title()
+            personalized = body.replace('{name}', name)
+            message = Mail(from_email=FROM_EMAIL, to_emails=e, subject=subject, plain_text_content=personalized)
+            resp = sg.send(message)
+            results.append({'email': e, 'status': resp.status_code})
+        except Exception as ex:
+            results.append({'email': e, 'error': str(ex)})
+
+    await db.email_logs.insert_one({'requestedBy': current['email'], 'payload': payload, 'results': results, 'ts': datetime.utcnow()})
+    return { 'success': True, 'results': results }
 
 
 if __name__ == '__main__':

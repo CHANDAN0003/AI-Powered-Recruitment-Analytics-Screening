@@ -1,31 +1,5 @@
-// TalentConnect - Recruitment Portal JavaScript
-// Main application logic for login, API calls, and common functionality
-
-// Global variables
-let currentUser = null;
-let authToken = null;
-
-// Initialize the application
-document.addEventListener('DOMContentLoaded', function() {
-    // Check if user is already logged in
-    checkAuthState();
-    
-    // Initialize page-specific functionality
-    const currentPage = window.location.pathname.split('/').pop();
-    
-    switch(currentPage) {
-        case 'index.html':
-        case '':
-            initializeLoginPage();
-            break;
-        case 'candidate.html':
-            initializeCandidatePage();
-            break;
-        case 'hr.html':
-            initializeHRPage();
-            break;
-    }
-});
+// REMOVED: legacy file neutralized. This file has been disabled and is no longer used by the project.
+// If you need it removed from the repository entirely, run a git rm or delete it locally.
 
 // Authentication Functions
 function checkAuthState() {
@@ -142,27 +116,8 @@ async function handleLogin(event) {
                 
                 result = {
                     success: true,
-                    user: {
-                        email: loginData.email,
-                        role: loginData.role,
-                        name: loginData.role === 'candidate' ? 'Demo Candidate' : 'Demo HR Manager'
-                    },
-                    token: 'demo_token_' + Date.now()
-                };
-            } else {
-                throw new Error('Invalid credentials');
-            }
-        }
-        
-        if (result.success) {
-            // Store authentication data
-            currentUser = result.user;
-            authToken = result.token;
-            
-            localStorage.setItem('currentUser', JSON.stringify(currentUser));
-            localStorage.setItem('authToken', authToken);
-            
-            showToast('Login successful! Redirecting...', 'success');
+                    // REMOVED: legacy file neutralized. This file has been disabled and is no longer used by the project.
+                    // If you need it removed from the repository entirely, run a git rm or delete it locally.
             
             setTimeout(() => {
                 redirectToDashboard(currentUser.role);
